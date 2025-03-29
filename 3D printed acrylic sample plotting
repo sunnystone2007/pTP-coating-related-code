@@ -1,0 +1,111 @@
+import os
+import matplotlib.pyplot as plt
+
+
+def read_spectral_data(filename, encoding="gb18030"):
+    """
+    Reads a file containing:
+      - A header
+      - A line with 'Begin Spectral Data'
+      - Followed by two columns of numerical data
+    Returns two lists: x_vals, y_vals
+    """
+    x_vals = []
+    y_vals = []
+    data_started = False
+
+    # Open the file with the specified encoding
+    with open(filename, "r", encoding=encoding) as f:
+        for line in f:
+            line = line.strip()
+            if "Begin Spectral Data" in line:
+                data_started = True
+                continue
+            if not data_started:
+                continue
+            if not line:
+                continue
+
+            parts = line.split()
+            if len(parts) >= 2:
+                try:
+                    x_val = float(parts[0])
+                    y_val = float(parts[1])
+                    x_vals.append(x_val)
+                    y_vals.append(y_val)
+                except ValueError:
+                    print(f"Skipping line, could not convert to float: {line}")
+    return x_vals, y_vals
+
+
+# -----------------------------------------------------------------------------
+# ADJUST THESE PATHS AND ENCODINGS FOR YOUR FILES
+# -----------------------------------------------------------------------------
+file1 = r"D:\LIBHUB\weeee\physics\experimental\PTP_layer\to_Stone\mcmaster_sprayed_10x10_density800\ptp 80_tol 14_ mma15_sprayed_edge.txt"
+file2 = r"D:\LIBHUB\weeee\physics\experimental\PTP_layer\to_Stone\3D printed Acrylic with 10000ug_cm^2\uk guy at the edge.txt"
+#file3 = r"D:\LIBHUB\weeee\physics\experimental\PTP_layer\to_Stone\mcmaster_sprayed_10x10_density800\ptp 80_tol 14_mma7.5glue7.5_sprayed_edge.txt"
+#file4 = r"C:\Users\HP\oceanview\Feb 13\MMA30_edge.txt"
+
+# Optional: specify a default encoding if needed for Chinese characters, etc.
+encoding = "gb18030"
+
+# -----------------------------------------------------------------------------
+# READ DATA INTO SEPARATE ARRAYS
+# -----------------------------------------------------------------------------
+if not os.path.exists(file1):
+    print(f"File not found: {file1}")
+    exit(1)
+x1, y1 = read_spectral_data(file1, encoding=encoding)
+
+if not os.path.exists(file2):
+    print(f"File not found: {file2}")
+    exit(1)
+x2, y2 = read_spectral_data(file2, encoding=encoding)
+
+#if not os.path.exists(file3):
+ #   print(f"File not found: {file3}")
+  #  exit(1)
+#x3, y3 = read_spectral_data(file3, encoding=encoding)
+
+#if not os.path.exists(file4):
+ #   print(f"File not found: {file4}")
+  #  exit(1)
+#x4, y4 = read_spectral_data(file4, encoding=encoding)
+
+# -----------------------------------------------------------------------------
+# PLOT EACH DATASET INDIVIDUALLY
+# -----------------------------------------------------------------------------
+plt.figure(figsize=(10, 6), dpi=150)
+
+# Plot 1
+plt.plot(x1, y1, alpha=0.7, linewidth=1.0, color='blue', label='ptp 80_tol 14_mma15_sprayed')
+
+# Plot 2
+plt.plot(x2, y2, alpha=0.7, linewidth=1.0, color='orange', label='3D printed Acrylic')
+
+# Plot 3
+#plt.plot(x3, y3, alpha=0.7, linewidth=1.0, color='purple', label='glue and MMA 7.5ml (Mcmaster)')
+
+# Plot 4
+#plt.plot(x4, y4, alpha=0.7, linewidth=1.0, color='green', label='MMA-30mL')
+
+# -----------------------------------------------------------------------------
+# FINAL PLOT SETTINGS
+# -----------------------------------------------------------------------------
+plt.xlabel("Wavelength(nm)")
+plt.ylabel("Intensity")
+plt.title("3D printed Acrylic comparison")
+plt.xlim(100, 1000)  # Adjust as needed
+plt.ylim(0, 2000)  # Adjust as needed
+plt.grid(False)
+# Add additional information in the lower left corner using relative coordinates
+info_text = ("spectrometer measured at the edge\n"
+             " "
+             ""
+             "")
+plt.gca().text(0.05, 0.85, info_text, transform=plt.gca().transAxes,
+               fontsize=10, verticalalignment='bottom',
+               bbox=dict(facecolor='white', alpha=0.5))
+plt.legend()
+
+plt.show()
